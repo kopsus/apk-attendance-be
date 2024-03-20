@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express'
 import LoggerUtil from './../util/loggerUtil'
 
-const DOMAIN = 'ADMIN_ROUTER'
+const DOMAIN = 'Admin Router'
 
 const adminRouter = Router()
 
