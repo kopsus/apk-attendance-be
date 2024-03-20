@@ -1,3 +1,3 @@
-import { sequelize } from "./sequelize"
+import { sequelize } from './sequelize'
 
 export const initDbConnection = () => sequelize.authenticate()

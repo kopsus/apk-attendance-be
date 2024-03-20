@@ -15,8 +15,12 @@ const port = 3000
 initDbConnection()
     .then(() => {
         initModel()
-    }).catch(err => {
-        LoggerUtil.log(DOMAIN, `Error when initialization: ${JSON.stringify(err)}`)
+    })
+    .catch((err) => {
+        LoggerUtil.log(
+            DOMAIN,
+            `Error when initialization: ${JSON.stringify(err)}`,
+        )
     })
 
 app.get('/healthcheck', (req: Request, res: Response) => {
