@@ -4,6 +4,7 @@ import adminRouter from './router/adminRouter'
 import Logger from './util/loggerUtil'
 import { initDbConnection } from './accessor/databaseConnectionInitializer'
 import { initModel } from './model/modelInitializer'
+import { employeeEntity } from './model/employeeEntity'
 import LoggerUtil from './util/loggerUtil'
 
 const DOMAIN = 'ROOT'
@@ -16,12 +17,24 @@ initDbConnection()
     .then(() => {
         initModel()
     })
-    .catch((err) => {
+    .catch((err: Error) => {
         LoggerUtil.log(
             DOMAIN,
             `Error when initialization: ${JSON.stringify(err)}`,
         )
     })
+
+app.use(express.json())
+
+app.post('/signup', async function (request: Request, response: Response) {
+    // Insert a new user into the database
+    const newUser = await employeeEntity.create({
+        email: request.body.email,
+        password: request.body.password,
+        company_id: request.body.company_id,
+    })
+    response.send(newUser)
+})
 
 app.get('/healthcheck', (req: Request, res: Response) => {
     res.send('Healthy!')
