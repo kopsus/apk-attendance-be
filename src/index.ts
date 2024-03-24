@@ -6,6 +6,7 @@ import { initDbConnection } from './accessor/databaseConnectionInitializer'
 import { initModel } from './model/modelInitializer'
 import { employeeEntity } from './model/employeeEntity'
 import LoggerUtil from './util/loggerUtil'
+import bcrypt from 'bcrypt'
 
 const DOMAIN = 'ROOT'
 
@@ -26,14 +27,65 @@ initDbConnection()
 
 app.use(express.json())
 
-app.post('/signup', async function (request: Request, response: Response) {
-    // Insert a new user into the database
-    const newUser = await employeeEntity.create({
-        email: request.body.email,
-        password: request.body.password,
-        company_id: request.body.company_id,
-    })
-    response.send(newUser)
+app.post('/signup', async function (req: Request, res: Response) {
+    try {
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(req.body.password, 10)
+
+        // Insert a new user into the database
+        const newUser = await employeeEntity.create({
+            email: req.body.email,
+            password: hashedPassword,
+            company_id: req.body.company_id,
+        })
+
+        // Response status code 200
+        res.send({
+            success: true,
+            data: {},
+            message: 'Data Created',
+            code: 200,
+        })
+    } catch (error) {
+        // TO DO: Handle error
+        res.status(500).json({ error: 'Internal Server Error' })
+    }
+})
+
+app.post('/login', async function (req: Request, res: Response) {
+    try {
+        // Checking if the user exists in the database
+        const userPassword = await employeeEntity.findOne({
+            attributes: ['password'],
+            where: {
+                email: req.body.email,
+            },
+        })
+
+        const hashedPassword = userPassword?.get('password')
+
+        // Check if the password is valid
+        if (typeof hashedPassword !== 'string' || hashedPassword === null) {
+            res.status(400).send({ error: 'Invalid Password' })
+            return
+        }
+
+        // Compare the password
+        const match = await bcrypt.compare(req.body.password, hashedPassword)
+        if (match) {
+            res.send({
+                success: true,
+                data: {},
+                message: 'Login Successfully',
+                code: 200,
+            })
+        } else {
+            res.status(401).json({ error: 'Invalid Email or Password' })
+        }
+    } catch (err) {
+        console.error('Error authenticating user:', err)
+        res.status(500).json({ error: 'Internal Server Error' })
+    }
 })
 
 app.get('/healthcheck', (req: Request, res: Response) => {
