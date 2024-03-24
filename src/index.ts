@@ -7,6 +7,7 @@ import { initModel } from './model/modelInitializer'
 import { employeeEntity } from './model/employeeEntity'
 import LoggerUtil from './util/loggerUtil'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 const DOMAIN = 'ROOT'
 
@@ -28,6 +29,7 @@ initDbConnection()
 app.use(express.json())
 
 app.post('/signup', async function (req: Request, res: Response) {
+
     try {
         // Hash the password
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
@@ -47,22 +49,27 @@ app.post('/signup', async function (req: Request, res: Response) {
             code: 200,
         })
     } catch (error) {
-        // TO DO: Handle error
         res.status(500).json({ error: 'Internal Server Error' })
     }
 })
 
 app.post('/login', async function (req: Request, res: Response) {
+
+    // Checking Header Authorization
+    // if (req.headers.authorization !== 'EternalPlus@100') {
+    //     res.status(401).json({ error: 'Unauthorized' })
+    // }
+
     try {
         // Checking if the user exists in the database
-        const userPassword = await employeeEntity.findOne({
-            attributes: ['password'],
+        const user = await employeeEntity.findOne({
+            attributes: ['id', 'password'],
             where: {
                 email: req.body.email,
             },
         })
 
-        const hashedPassword = userPassword?.get('password')
+        const hashedPassword = user?.get('password')
 
         // Check if the password is valid
         if (typeof hashedPassword !== 'string' || hashedPassword === null) {
@@ -73,9 +80,13 @@ app.post('/login', async function (req: Request, res: Response) {
         // Compare the password
         const match = await bcrypt.compare(req.body.password, hashedPassword)
         if (match) {
+            const access_token = jwt.sign({ userId: user?.get('id') }, 'EternalPlus@100', {
+                expiresIn: '1w',
+                });
+
             res.send({
                 success: true,
-                data: {},
+                data: {access_token},
                 message: 'Login Successfully',
                 code: 200,
             })
