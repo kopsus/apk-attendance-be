@@ -1,5 +1,5 @@
 require('dotenv').config()
-import express, { Request, Response } from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import adminRouter from './router/adminRouter'
 import Logger from './util/loggerUtil'
 import { initDbConnection } from './accessor/databaseConnectionInitializer'
@@ -20,7 +20,7 @@ initDbConnection()
         initModel()
     })
     .catch((err: Error) => {
-        LoggerUtil.log(
+        LoggerUtil.info(
             DOMAIN,
             `Error when initialization: ${JSON.stringify(err)}`,
         )
@@ -106,11 +106,11 @@ app.get('/healthcheck', (req: Request, res: Response) => {
 // Use the external router for the specific path
 app.use('/admin', adminRouter)
 
-app.use('*', (req: Request, res: Response) => {
-    Logger.log(DOMAIN, `Unhandled path: ${req.originalUrl}`)
-    res.status(404).send('Not Found')
-})
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    LoggerUtil.error(DOMAIN, `Got exception: ${err.message}`)
+    res.status(500).send();
+});
 
 app.listen(port, () => {
-    Logger.log(DOMAIN, `Server is running on http://localhost:${port}`)
+    Logger.info(DOMAIN, `Server is running on http://localhost:${port}`)
 })
