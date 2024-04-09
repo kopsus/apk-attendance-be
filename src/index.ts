@@ -1,5 +1,6 @@
 require('dotenv').config()
 import express, { NextFunction, Request, Response } from 'express'
+import cors from 'cors'
 import adminRouter from './router/adminRouter'
 import Logger from './util/loggerUtil'
 import { initDbConnection } from './accessor/databaseConnectionInitializer'
@@ -24,6 +25,7 @@ initDbConnection()
         )
     })
 
+app.use(cors())
 app.use(express.json())
 
 app.get('/healthcheck', (req: Request, res: Response) => {
