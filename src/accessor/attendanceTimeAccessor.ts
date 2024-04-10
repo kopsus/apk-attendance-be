@@ -5,8 +5,11 @@ import { IStandardResponse } from '../model/dto/standardResponse'
 import { attendanceTimeEntity } from '../model/attendanceTimeEntity'
 import LoggerUtil from '../util/loggerUtil'
 
-const DOMAIN = 'Attendance Time Accessor'
+interface ITotalRows {
+    total: number
+}
 
+const DOMAIN = 'Attendance Time Accessor'
 
 const getAllAttendanceTimes = async (
     limit: number,
@@ -24,6 +27,14 @@ const getAllAttendanceTimes = async (
 
     const data = await sequelize.query(query, { type: QueryTypes.SELECT })
     return data
+}
+
+const getAllAttendanceTimesCount = async (): Promise<ITotalRows[]> => {
+    const query = 'SELECT COUNT(*) as total FROM Employee, Company, AttendanceTime ' +
+        'WHERE AttendanceTime.employee_id = Employee.id AND Employee.company_id = Company.id;'
+    
+    const data = await sequelize.query(query, { type: QueryTypes.SELECT })
+    return data.map(each => each as ITotalRows)
 }
 
 const insertAttendace = async ({
@@ -58,4 +69,5 @@ const insertAttendace = async ({
 export default {
     getAllAttendanceTimes,
     insertAttendace,
+    getAllAttendanceTimesCount,
 }

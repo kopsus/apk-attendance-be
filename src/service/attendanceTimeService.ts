@@ -9,12 +9,17 @@ const getAllAttendanceTimes = async (
     sortOrder: string,
 ) => {
     const sortOrderEnum = SortOrderEnum[sortOrder as keyof typeof SortOrderEnum]
-    return await attendanceTimeAccessor.getAllAttendanceTimes(
+    const attendanceTimesData = await attendanceTimeAccessor.getAllAttendanceTimes(
         limit,
         offset,
         sortBy!,
         sortOrderEnum,
     )
+    const attendanceTimesCountRows = await attendanceTimeAccessor.getAllAttendanceTimesCount()
+    return {
+        data: attendanceTimesData, 
+        count: attendanceTimesCountRows[0].total
+    }
 }
 
 const insertAttendace = async ({

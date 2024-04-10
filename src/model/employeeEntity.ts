@@ -25,6 +25,10 @@ export const employeeEntity = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+        role: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
     },
     {
         freezeTableName: true,
