@@ -38,8 +38,8 @@ app.use('/user', userRouter)
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     LoggerUtil.error(DOMAIN, `Got exception: ${err.message}`)
-    res.status(500).send();
-});
+    res.status(500).send()
+})
 
 app.listen(port, () => {
     Logger.info(DOMAIN, `Server is running on http://localhost:${port}`)
