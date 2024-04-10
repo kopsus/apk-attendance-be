@@ -15,7 +15,7 @@ export const employeeEntity = sequelize.define(
         email: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: 'email'
+            unique: 'email',
         },
         password: {
             type: DataTypes.STRING,

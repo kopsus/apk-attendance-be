@@ -26,10 +26,10 @@ export const initModel = () => {
 
     attendanceTimeEntity
         .sync({ alter: true })
-        .catch((e) => 
+        .catch((e) =>
             LoggerUtil.info(
                 CLASS_NAME,
-                `Error when init attendance time entity. Error: ${e}`
-            )
+                `Error when init attendance time entity. Error: ${e}`,
+            ),
         )
 }

@@ -1,4 +1,4 @@
 export interface IStandardResponse {
-    data?: any,
+    data?: any
     errorMessage?: string
 }
