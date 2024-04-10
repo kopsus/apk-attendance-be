@@ -7,30 +7,6 @@ const DOMAIN = 'User Router'
 
 const userRouter = Router()
 
-userRouter.post('/signup', async function (req: Request, res: Response) {
-    try {
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(req.body.password, 10)
-
-        // Insert a new user into the database
-        const newUser = await employeeEntity.create({
-            email: req.body.email,
-            password: hashedPassword,
-            company_id: req.body.company_id,
-        })
-
-        // Response status code 200
-        res.send({
-            success: true,
-            data: {},
-            message: 'Data Created',
-            code: 200,
-        })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' })
-    }
-})
-
 userRouter.post('/login', async function (req: Request, res: Response) {
     try {
         // Checking if the user exists in the database

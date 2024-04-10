@@ -1,11 +1,9 @@
 import { Request, Response, Router } from 'express'
 import asyncHandler from 'express-async-handler'
-import LoggerUtil from './../util/loggerUtil'
 import { adminMiddleware } from '../middleware/adminMiddleware'
 import attendanceTimeService from './../service/attendanceTimeService'
 import companyService from '../service/companyService'
-
-const DOMAIN = 'Admin Router'
+import employeeService from '../service/employeeService'
 
 const adminRouter = Router()
 
@@ -14,6 +12,24 @@ adminRouter.use(adminMiddleware)
 adminRouter.get('/ping', (req: Request, res: Response) => {
     res.send('pong')
 })
+
+adminRouter.post('/signup', asyncHandler(async (req: Request, res: Response) => {
+    const { companyId, email, password } = req.body
+
+    const newUser = await employeeService.insertEmployee({ companyId: companyId, email: email, plainPassword: password })
+
+    if (newUser.errorMessage != null) {
+        res.status(500).json({ error: newUser.errorMessage })
+        return
+    }
+
+    res.send({
+        success: true,
+        data: {},
+        message: 'Data Created',
+        code: 200
+    })
+}))
 
 adminRouter.get('/attendance-time', asyncHandler(async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string)
