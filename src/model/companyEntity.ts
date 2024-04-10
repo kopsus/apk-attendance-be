@@ -1,6 +1,13 @@
 import { DataTypes } from 'sequelize'
 import { sequelize } from './../accessor/sequelize'
 
+export interface ICompany {
+    id: number;
+    name: string;
+    latitude: number;
+    longitude: number;
+}
+
 export const companyEntity = sequelize.define(
     'Company',
     {
