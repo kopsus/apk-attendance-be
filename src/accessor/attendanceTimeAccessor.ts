@@ -21,7 +21,7 @@ const getAllAttendanceTimes = async (
         'SELECT Employee.name as name, Company.id as companyId, Company.name as companyName, AttendanceTime.action as action, Attendancetime.timestamp as time ' +
         'FROM Employee, Company, AttendanceTime ' +
         'WHERE AttendanceTime.employee_id = Employee.id AND Employee.company_id = Company.id ' +
-        `ORDER BY AttendanceTime.${sortBy} ${SortOrderEnum[sortOrder]} ` +
+        `ORDER BY ${sortBy} ${SortOrderEnum[sortOrder]} ` +
         `LIMIT ${limit} ` +
         `OFFSET ${offset};`
 
