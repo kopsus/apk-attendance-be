@@ -63,7 +63,7 @@ userRouter.post('/login', function (req, res) {
 const upload = (0, multer_1.default)({ dest: 'uploads/' }); // Destination folder for uploaded files
 // Endpoint for uploading photos
 userRouter.post('/attendance', upload.single('photo'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a;
     const { employeeId, action } = req.body;
     const imageId = ((_a = req.file) === null || _a === void 0 ? void 0 : _a.filename) || '';
     const newAttendance = yield attendanceTimeService_1.default.insertAttendace({
@@ -81,10 +81,5 @@ userRouter.post('/attendance', upload.single('photo'), (req, res) => __awaiter(v
         message: `${action} Successfully`,
         code: 200,
     });
-    // Access uploaded file via req.file
-    console.log((_b = req.file) === null || _b === void 0 ? void 0 : _b.filename);
-    console.log(req.body);
-    // Handle file storage, processing, or any other operations
-    res.send('File uploaded successfully');
 }));
 exports.default = userRouter;
