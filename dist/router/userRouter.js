@@ -39,12 +39,15 @@ userRouter.post('/login', function (req, res) {
             // Compare the password
             const match = yield bcrypt_1.default.compare(req.body.password, hashedPassword);
             if (match) {
-                const access_token = jsonwebtoken_1.default.sign({ userId: user === null || user === void 0 ? void 0 : user.get('id') }, 'EternalPlus@100', {
+                const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                const accessToken = jsonwebtoken_1.default.sign({ userId: user === null || user === void 0 ? void 0 : user.get('id') }, 'EternalPlus@100', {
                     expiresIn: '1w',
                 });
                 res.send({
                     success: true,
-                    data: { access_token },
+                    data: { accessToken,
+                        expiredAt: expiredAt,
+                    },
                     message: 'Login Successfully',
                     code: 200,
                 });
@@ -63,7 +66,7 @@ userRouter.post('/login', function (req, res) {
 const upload = (0, multer_1.default)({ dest: 'uploads/' }); // Destination folder for uploaded files
 // Endpoint for uploading photos
 userRouter.post('/attendance', upload.single('photo'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a;
     const { employeeId, action } = req.body;
     const imageId = ((_a = req.file) === null || _a === void 0 ? void 0 : _a.filename) || '';
     const newAttendance = yield attendanceTimeService_1.default.insertAttendace({
@@ -81,10 +84,16 @@ userRouter.post('/attendance', upload.single('photo'), (req, res) => __awaiter(v
         message: `${action} Successfully`,
         code: 200,
     });
-    // Access uploaded file via req.file
-    console.log((_b = req.file) === null || _b === void 0 ? void 0 : _b.filename);
-    console.log(req.body);
-    // Handle file storage, processing, or any other operations
-    res.send('File uploaded successfully');
 }));
+// userRouter.get(
+//     '/user-history',
+//     asyncHandler(async (req: Request, res: Response) => {
+//         const response = await companyService.getCompanyList()
+//         const curatedResponse = response.map((company) => ({
+//             id: company.id,
+//             name: company.name,
+//         }))
+//         res.send(curatedResponse)
+//     }),
+// )
 exports.default = userRouter;

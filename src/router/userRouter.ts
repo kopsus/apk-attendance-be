@@ -30,7 +30,8 @@ userRouter.post('/login', async function (req: Request, res: Response) {
         // Compare the password
         const match = await bcrypt.compare(req.body.password, hashedPassword)
         if (match) {
-            const access_token = jwt.sign(
+            const expiredAt = Date.now() + 7 * 24 * 60 * 60 * 1000
+            const accessToken = jwt.sign(
                 { userId: user?.get('id') },
                 'EternalPlus@100',
                 {
@@ -40,7 +41,9 @@ userRouter.post('/login', async function (req: Request, res: Response) {
 
             res.send({
                 success: true,
-                data: { access_token },
+                data: { accessToken,
+                    expiredAt: expiredAt,
+                 },
                 message: 'Login Successfully',
                 code: 200,
             })
@@ -79,5 +82,16 @@ userRouter.post('/attendance', upload.single('photo'), async (req: Request, res:
         code: 200,
     })
 });
+
+userRouter.get(
+    '/getHistoryByUserId',
+   async (req: Request, res: Response) => {
+        const response = await companyService.getCompanyList()
+        const curatedResponse = response.map((company) => ({
+            id: company.id,
+            name: company.name,
+        }))
+        res.send(curatedResponse)
+    })
 
 export default userRouter
