@@ -2,7 +2,8 @@ import { Request, Response, Router } from 'express'
 import { employeeEntity } from '../model/employeeEntity'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-// import multer from 'multer'
+import multer from 'multer'
+import AttendanceTimeService from '../service/attendanceTimeService'
 
 const DOMAIN = 'User Router'
 
@@ -53,14 +54,30 @@ userRouter.post('/login', async function (req: Request, res: Response) {
 })
 
 // Set up Multer for handling multipart/form-data (file uploads)
-// const upload = multer({ dest: 'uploads/' }); // Destination folder for uploaded files
+const upload = multer({ dest: 'uploads/' }); // Destination folder for uploaded files
 
-// // Endpoint for uploading photos
-// userRouter.post('/attendance', upload.single('photo'), (req: Request, res: Response) => {
-//     // Access uploaded file via req.file
-//     // console.log(req.file);
-//     // Handle file storage, processing, or any other operations
-//     res.send('File uploaded successfully');
-// });
+// Endpoint for uploading photos
+userRouter.post('/attendance', upload.single('photo'), async (req: Request, res: Response) => {
+    const { employeeId, action } = req.body
+    const imageId = req.file?.filename || ''
+
+    const newAttendance = await AttendanceTimeService.insertAttendace({
+        employeeId: employeeId,
+        action: action,
+        imageId: imageId,
+    })
+
+    if (newAttendance.errorMessage != null) {
+        res.status(500).json({ error: newAttendance.errorMessage })
+        return
+    }
+
+    res.send({
+        success: true,
+        data: {},
+        message:`${action} Successfully`,
+        code: 200,
+    })
+});
 
 export default userRouter

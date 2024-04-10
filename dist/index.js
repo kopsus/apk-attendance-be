@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require('dotenv').config();
 const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
 const adminRouter_1 = __importDefault(require("./router/adminRouter"));
 const loggerUtil_1 = __importDefault(require("./util/loggerUtil"));
 const databaseConnectionInitializer_1 = require("./accessor/databaseConnectionInitializer");
@@ -22,6 +23,7 @@ const port = 3000;
     .catch((err) => {
     loggerUtil_2.default.info(DOMAIN, `Error when initialization: ${JSON.stringify(err)}`);
 });
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.get('/healthcheck', (req, res) => {
     res.send('Healthy!');

@@ -1,6 +1,12 @@
 import { QueryTypes } from 'sequelize'
 import { SortOrderEnum } from '../model/enum/sortOrderEnum'
 import { sequelize } from './sequelize'
+import { IStandardResponse } from '../model/dto/standardResponse'
+import { attendanceTimeEntity } from '../model/attendanceTimeEntity'
+import LoggerUtil from '../util/loggerUtil'
+
+const DOMAIN = 'Attendance Time Accessor'
+
 
 const getAllAttendanceTimes = async (
     limit: number,
@@ -20,6 +26,36 @@ const getAllAttendanceTimes = async (
     return data
 }
 
+const insertAttendace = async ({
+    employeeId,
+    action,
+    imageId,
+    timestamp,
+}: {
+    employeeId: number
+    action: string
+    imageId: string
+    timestamp: number
+}): Promise<IStandardResponse> => {
+    try {
+        const newEmployee = await attendanceTimeEntity.create({
+            employee_id: employeeId,
+            action: action,
+            image_id: imageId,
+            timestamp: timestamp
+        })
+
+        return { data: newEmployee }
+    } catch (error) {
+        LoggerUtil.error(
+            DOMAIN,
+            `Got error when inserting employee: ${JSON.stringify(error)}`,
+        )
+        throw error
+    }
+}
+
 export default {
     getAllAttendanceTimes,
+    insertAttendace,
 }

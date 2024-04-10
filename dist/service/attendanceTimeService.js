@@ -18,6 +18,16 @@ const getAllAttendanceTimes = (limit, offset, sortBy, sortOrder) => __awaiter(vo
     const sortOrderEnum = sortOrderEnum_1.SortOrderEnum[sortOrder];
     return yield attendanceTimeAccessor_1.default.getAllAttendanceTimes(limit, offset, sortBy, sortOrderEnum);
 });
+const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ employeeId, action, imageId, }) {
+    const timestamp = Date.now();
+    return yield attendanceTimeAccessor_1.default.insertAttendace({
+        employeeId,
+        action,
+        imageId,
+        timestamp
+    });
+});
 exports.default = {
-    getAllAttendanceTimes
+    getAllAttendanceTimes,
+    insertAttendace,
 };

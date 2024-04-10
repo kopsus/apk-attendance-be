@@ -16,33 +16,10 @@ const express_1 = require("express");
 const employeeEntity_1 = require("../model/employeeEntity");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-// import multer from 'multer'
+const multer_1 = __importDefault(require("multer"));
+const attendanceTimeService_1 = __importDefault(require("../service/attendanceTimeService"));
 const DOMAIN = 'User Router';
 const userRouter = (0, express_1.Router)();
-userRouter.post('/signup', function (req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            // Hash the password
-            const hashedPassword = yield bcrypt_1.default.hash(req.body.password, 10);
-            // Insert a new user into the database
-            const newUser = yield employeeEntity_1.employeeEntity.create({
-                email: req.body.email,
-                password: hashedPassword,
-                companyId: req.body.company_id,
-            });
-            // Response status code 200
-            res.send({
-                success: true,
-                data: {},
-                message: 'Data Created',
-                code: 200,
-            });
-        }
-        catch (error) {
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-    });
-});
 userRouter.post('/login', function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -83,12 +60,31 @@ userRouter.post('/login', function (req, res) {
     });
 });
 // Set up Multer for handling multipart/form-data (file uploads)
-// const upload = multer({ dest: 'uploads/' }); // Destination folder for uploaded files
-// // Endpoint for uploading photos
-// userRouter.post('/attendance', upload.single('photo'), (req: Request, res: Response) => {
-//     // Access uploaded file via req.file
-//     // console.log(req.file);
-//     // Handle file storage, processing, or any other operations
-//     res.send('File uploaded successfully');
-// });
+const upload = (0, multer_1.default)({ dest: 'uploads/' }); // Destination folder for uploaded files
+// Endpoint for uploading photos
+userRouter.post('/attendance', upload.single('photo'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
+    const { employeeId, action } = req.body;
+    const imageId = ((_a = req.file) === null || _a === void 0 ? void 0 : _a.filename) || '';
+    const newAttendance = yield attendanceTimeService_1.default.insertAttendace({
+        employeeId: employeeId,
+        action: action,
+        imageId: imageId,
+    });
+    if (newAttendance.errorMessage != null) {
+        res.status(500).json({ error: newAttendance.errorMessage });
+        return;
+    }
+    res.send({
+        success: true,
+        data: {},
+        message: `${action} Successfully`,
+        code: 200,
+    });
+    // Access uploaded file via req.file
+    console.log((_b = req.file) === null || _b === void 0 ? void 0 : _b.filename);
+    console.log(req.body);
+    // Handle file storage, processing, or any other operations
+    res.send('File uploaded successfully');
+}));
 exports.default = userRouter;

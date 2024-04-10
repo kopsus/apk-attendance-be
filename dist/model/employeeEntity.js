@@ -15,6 +15,7 @@ exports.employeeEntity = sequelize_2.sequelize.define('Employee', {
     email: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
+        unique: 'email',
     },
     password: {
         type: sequelize_1.DataTypes.STRING,

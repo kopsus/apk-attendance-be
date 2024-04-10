@@ -1,5 +1,6 @@
 import { SortOrderEnum } from '../model/enum/sortOrderEnum'
 import attendanceTimeAccessor from './../accessor/attendanceTimeAccessor'
+import { IStandardResponse } from '../model/dto/standardResponse'
 
 const getAllAttendanceTimes = async (
     limit: number,
@@ -16,6 +17,25 @@ const getAllAttendanceTimes = async (
     )
 }
 
+const insertAttendace = async ({
+    employeeId,
+    action,
+    imageId,
+}: {
+    employeeId: number
+    action: string
+    imageId: string
+}): Promise<IStandardResponse> => {
+    const timestamp = Date.now()
+    return await attendanceTimeAccessor.insertAttendace({
+        employeeId,
+        action,
+        imageId,
+        timestamp
+    })
+}
+
 export default {
     getAllAttendanceTimes,
+    insertAttendace,
 }

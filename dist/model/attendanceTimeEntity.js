@@ -7,25 +7,25 @@ exports.attendanceTimeEntity = sequelize_2.sequelize.define('AttendanceTime', {
     id: {
         type: sequelize_1.DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
     },
     employee_id: {
         type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
     },
     action: {
         type: sequelize_1.DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
     timestamp: {
         type: sequelize_1.DataTypes.BIGINT,
-        allowNull: false
+        allowNull: false,
     },
     image_id: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
-        unique: 'imageId'
-    }
+        unique: 'imageId',
+    },
 }, {
-    freezeTableName: true
+    freezeTableName: true,
 });
