@@ -22,11 +22,17 @@ const getAllAttendanceTimes = (limit, offset, sortBy, sortOrder) => __awaiter(vo
     const query = 'SELECT Employee.name as name, Company.id as companyId, Company.name as companyName, AttendanceTime.action as action, Attendancetime.timestamp as time ' +
         'FROM Employee, Company, AttendanceTime ' +
         'WHERE AttendanceTime.employee_id = Employee.id AND Employee.company_id = Company.id ' +
-        `ORDER BY AttendanceTime.${sortBy} ${sortOrderEnum_1.SortOrderEnum[sortOrder]} ` +
+        `ORDER BY ${sortBy} ${sortOrderEnum_1.SortOrderEnum[sortOrder]} ` +
         `LIMIT ${limit} ` +
         `OFFSET ${offset};`;
     const data = yield sequelize_2.sequelize.query(query, { type: sequelize_1.QueryTypes.SELECT });
     return data;
+});
+const getAllAttendanceTimesCount = () => __awaiter(void 0, void 0, void 0, function* () {
+    const query = 'SELECT COUNT(*) as total FROM Employee, Company, AttendanceTime ' +
+        'WHERE AttendanceTime.employee_id = Employee.id AND Employee.company_id = Company.id;';
+    const data = yield sequelize_2.sequelize.query(query, { type: sequelize_1.QueryTypes.SELECT });
+    return data.map(each => each);
 });
 const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ employeeId, action, imageId, timestamp, }) {
     try {
@@ -46,4 +52,5 @@ const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ emp
 exports.default = {
     getAllAttendanceTimes,
     insertAttendace,
+    getAllAttendanceTimesCount,
 };

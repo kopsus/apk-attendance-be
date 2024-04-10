@@ -16,12 +16,13 @@ const sequelize_1 = require("sequelize");
 const employeeEntity_1 = require("../model/employeeEntity");
 const loggerUtil_1 = __importDefault(require("../util/loggerUtil"));
 const DOMAIN = 'Employee Accessor';
-const insertEmployee = (_a) => __awaiter(void 0, [_a], void 0, function* ({ companyId, email, hashedPassword, }) {
+const insertEmployee = (_a) => __awaiter(void 0, [_a], void 0, function* ({ companyId, email, hashedPassword, role, }) {
     try {
         const newEmployee = yield employeeEntity_1.employeeEntity.create({
             email: email,
             password: hashedPassword,
             company_id: companyId,
+            role: role,
         });
         return { data: newEmployee };
     }
