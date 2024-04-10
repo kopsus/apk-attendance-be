@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express'
 import { employeeEntity } from '../model/employeeEntity'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+// import multer from 'multer'
 
 const DOMAIN = 'User Router'
 
@@ -16,7 +17,7 @@ userRouter.post('/signup', async function (req: Request, res: Response) {
         const newUser = await employeeEntity.create({
             email: req.body.email,
             password: hashedPassword,
-            company_id: req.body.company_id,
+            company_id: req.body.companyId,
         })
 
         // Response status code 200
@@ -74,5 +75,16 @@ userRouter.post('/login', async function (req: Request, res: Response) {
         res.status(500).json({ error: 'Internal Server Error' })
     }
 })
+
+// Set up Multer for handling multipart/form-data (file uploads)
+// const upload = multer({ dest: 'uploads/' }); // Destination folder for uploaded files
+
+// // Endpoint for uploading photos
+// userRouter.post('/attendance', upload.single('photo'), (req: Request, res: Response) => {
+//     // Access uploaded file via req.file
+//     // console.log(req.file);
+//     // Handle file storage, processing, or any other operations
+//     res.send('File uploaded successfully');
+// });
 
 export default userRouter
