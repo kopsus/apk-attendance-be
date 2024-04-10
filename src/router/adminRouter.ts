@@ -16,12 +16,13 @@ adminRouter.get('/ping', (req: Request, res: Response) => {
 adminRouter.post(
     '/signup',
     asyncHandler(async (req: Request, res: Response) => {
-        const { companyId, email, password } = req.body
+        const { companyId, email, password, role } = req.body
 
         const newUser = await employeeService.insertEmployee({
             companyId: companyId,
             email: email,
             plainPassword: password,
+            role: role,
         })
 
         if (newUser.errorMessage != null) {
