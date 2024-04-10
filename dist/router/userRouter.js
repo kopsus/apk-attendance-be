@@ -39,12 +39,15 @@ userRouter.post('/login', function (req, res) {
             // Compare the password
             const match = yield bcrypt_1.default.compare(req.body.password, hashedPassword);
             if (match) {
-                const access_token = jsonwebtoken_1.default.sign({ userId: user === null || user === void 0 ? void 0 : user.get('id') }, 'EternalPlus@100', {
+                const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                const accessToken = jsonwebtoken_1.default.sign({ userId: user === null || user === void 0 ? void 0 : user.get('id') }, 'EternalPlus@100', {
                     expiresIn: '1w',
                 });
                 res.send({
                     success: true,
-                    data: { access_token },
+                    data: { accessToken,
+                        expiredAt: expiredAt,
+                    },
                     message: 'Login Successfully',
                     code: 200,
                 });
@@ -82,4 +85,15 @@ userRouter.post('/attendance', upload.single('photo'), (req, res) => __awaiter(v
         code: 200,
     });
 }));
+// userRouter.get(
+//     '/user-history',
+//     asyncHandler(async (req: Request, res: Response) => {
+//         const response = await companyService.getCompanyList()
+//         const curatedResponse = response.map((company) => ({
+//             id: company.id,
+//             name: company.name,
+//         }))
+//         res.send(curatedResponse)
+//     }),
+// )
 exports.default = userRouter;
