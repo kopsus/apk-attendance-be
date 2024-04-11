@@ -19,7 +19,7 @@ const attendanceTimeEntity_1 = require("../model/attendanceTimeEntity");
 const loggerUtil_1 = __importDefault(require("../util/loggerUtil"));
 const DOMAIN = 'Attendance Time Accessor';
 const getAllAttendanceTimes = (limit, offset, sortBy, sortOrder) => __awaiter(void 0, void 0, void 0, function* () {
-    const query = 'SELECT Employee.name as name, Company.id as companyId, Company.name as companyName, AttendanceTime.action as action, Attendancetime.timestamp as time ' +
+    const query = 'SELECT Employee.name as name, Company.id as companyId, Company.name as companyName, AttendanceTime.action as action, AttendanceTime.timestamp as time ' +
         'FROM Employee, Company, AttendanceTime ' +
         'WHERE AttendanceTime.employee_id = Employee.id AND Employee.company_id = Company.id ' +
         `ORDER BY ${sortBy} ${sortOrderEnum_1.SortOrderEnum[sortOrder]} ` +
