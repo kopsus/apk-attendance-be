@@ -18,7 +18,7 @@ const getAllAttendanceTimes = async (
     sortOrder: SortOrderEnum,
 ) => {
     const query =
-        'SELECT Employee.name as name, Company.id as companyId, Company.name as companyName, AttendanceTime.action as action, Attendancetime.timestamp as time ' +
+        'SELECT Employee.name as name, Company.id as companyId, Company.name as companyName, AttendanceTime.action as action, AttendanceTime.timestamp as time ' +
         'FROM Employee, Company, AttendanceTime ' +
         'WHERE AttendanceTime.employee_id = Employee.id AND Employee.company_id = Company.id ' +
         `ORDER BY ${sortBy} ${SortOrderEnum[sortOrder]} ` +
