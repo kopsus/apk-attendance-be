@@ -10,8 +10,8 @@ const insertEmployee = async ({
 }: {
     companyId: number
     email: string
-    plainPassword: string,
-    role: string,
+    plainPassword: string
+    role: string
 }): Promise<IStandardResponse> => {
     const hashedPassword = await bcrypt.hash(plainPassword, 10)
     return await employeeAccessor.insertEmployee({

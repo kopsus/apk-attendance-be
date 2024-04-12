@@ -27,7 +27,7 @@ export const employeeEntity = sequelize.define(
         },
         role: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
         },
     },
     {

@@ -32,7 +32,7 @@ const getAllAttendanceTimesCount = () => __awaiter(void 0, void 0, void 0, funct
     const query = 'SELECT COUNT(*) as total FROM Employee, Company, AttendanceTime ' +
         'WHERE AttendanceTime.employee_id = Employee.id AND Employee.company_id = Company.id;';
     const data = yield sequelize_2.sequelize.query(query, { type: sequelize_1.QueryTypes.SELECT });
-    return data.map(each => each);
+    return data.map((each) => each);
 });
 const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ employeeId, action, imageId, timestamp, }) {
     try {
@@ -40,7 +40,7 @@ const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ emp
             employee_id: employeeId,
             action: action,
             image_id: imageId,
-            timestamp: timestamp
+            timestamp: timestamp,
         });
         return { data: newEmployee };
     }

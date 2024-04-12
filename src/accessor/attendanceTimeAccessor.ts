@@ -30,11 +30,12 @@ const getAllAttendanceTimes = async (
 }
 
 const getAllAttendanceTimesCount = async (): Promise<ITotalRows[]> => {
-    const query = 'SELECT COUNT(*) as total FROM Employee, Company, AttendanceTime ' +
+    const query =
+        'SELECT COUNT(*) as total FROM Employee, Company, AttendanceTime ' +
         'WHERE AttendanceTime.employee_id = Employee.id AND Employee.company_id = Company.id;'
-    
+
     const data = await sequelize.query(query, { type: QueryTypes.SELECT })
-    return data.map(each => each as ITotalRows)
+    return data.map((each) => each as ITotalRows)
 }
 
 const insertAttendace = async ({
@@ -53,7 +54,7 @@ const insertAttendace = async ({
             employee_id: employeeId,
             action: action,
             image_id: imageId,
-            timestamp: timestamp
+            timestamp: timestamp,
         })
 
         return { data: newEmployee }

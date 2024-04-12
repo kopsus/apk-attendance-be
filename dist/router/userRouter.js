@@ -14,6 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const employeeEntity_1 = require("../model/employeeEntity");
+const companyEntity_1 = require("../model/companyEntity");
+const attendanceTimeEntity_1 = require("../model/attendanceTimeEntity");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const multer_1 = __importDefault(require("multer"));
@@ -25,9 +27,15 @@ userRouter.post('/login', function (req, res) {
         try {
             // Checking if the user exists in the database
             const user = yield employeeEntity_1.employeeEntity.findOne({
-                attributes: ['id', 'password'],
+                attributes: ['id', 'password', 'company_id', 'role', 'name'],
                 where: {
                     email: req.body.email,
+                },
+            });
+            const company = yield companyEntity_1.companyEntity.findOne({
+                attributes: ['name', 'longitude', 'latitude'],
+                where: {
+                    id: user === null || user === void 0 ? void 0 : user.get('company_id'),
                 },
             });
             const hashedPassword = user === null || user === void 0 ? void 0 : user.get('password');
@@ -45,9 +53,8 @@ userRouter.post('/login', function (req, res) {
                 });
                 res.send({
                     success: true,
-                    data: { accessToken,
-                        expiredAt: expiredAt,
-                    },
+                    data: { accessToken, expiredAt: expiredAt, companyName: company === null || company === void 0 ? void 0 : company.get('name'),
+                        latitude: company === null || company === void 0 ? void 0 : company.get('latitude'), longitude: company === null || company === void 0 ? void 0 : company.get('longitude'), role: user === null || user === void 0 ? void 0 : user.get('role'), name: user === null || user === void 0 ? void 0 : user.get('name') },
                     message: 'Login Successfully',
                     code: 200,
                 });
@@ -67,10 +74,49 @@ const upload = (0, multer_1.default)({ dest: 'uploads/' }); // Destination folde
 // Endpoint for uploading photos
 userRouter.post('/attendance', upload.single('photo'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const { employeeId, action } = req.body;
+    let decoded;
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+        const authorization = req.headers.authorization.split(' ')[1];
+        const secret = 'EternalPlus@100';
+        decoded = jsonwebtoken_1.default.verify(authorization, secret);
+        console.log(decoded);
+    }
+    else {
+        res.send({
+            success: true,
+            data: {},
+            message: "Authorization header is not present",
+            code: 403,
+        });
+        return;
+    }
+    if (typeof decoded === 'string' || !decoded.userId) {
+        res.send({
+            success: false,
+            data: {},
+            message: "Authorization failed",
+            code: 403,
+        });
+        return;
+    }
+    const lastHistory = yield attendanceTimeEntity_1.attendanceTimeEntity.findAll({
+        attributes: ['action', 'timestamp'],
+        where: {
+            employee_id: decoded.userId,
+        },
+        order: [['timestamp', 'DESC']],
+        limit: 1,
+    });
+    let action;
+    if (!lastHistory || lastHistory.length === 0) {
+        action = 'CHECK_IN';
+    }
+    else {
+        action = lastHistory[0].get('action') === 'CHECK_IN' ? 'CHECK_OUT' : 'CHECK_IN';
+    }
     const imageId = ((_a = req.file) === null || _a === void 0 ? void 0 : _a.filename) || '';
     const newAttendance = yield attendanceTimeService_1.default.insertAttendace({
-        employeeId: employeeId,
+        employeeId: decoded.userId,
         action: action,
         imageId: imageId,
     });
@@ -86,11 +132,110 @@ userRouter.post('/attendance', upload.single('photo'), (req, res) => __awaiter(v
     });
 }));
 userRouter.get('/getHistoryByUserId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield companyService.getCompanyList();
-    const curatedResponse = response.map((company) => ({
-        id: company.id,
-        name: company.name,
-    }));
-    res.send(curatedResponse);
+    let decoded;
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+        const authorization = req.headers.authorization.split(' ')[1];
+        const secret = 'EternalPlus@100';
+        decoded = jsonwebtoken_1.default.verify(authorization, secret);
+        console.log(decoded);
+    }
+    else {
+        res.send({
+            success: true,
+            data: {},
+            message: "Authorization header is not present",
+            code: 403,
+        });
+        return;
+    }
+    let historyUser;
+    if (typeof decoded !== 'string' && 'userId' in decoded) {
+        historyUser = yield attendanceTimeEntity_1.attendanceTimeEntity.findAll({
+            attributes: ['action', 'timestamp'],
+            where: {
+                id: decoded.userId,
+            },
+        });
+    }
+    res.send({
+        success: true,
+        data: historyUser,
+        message: 'Get History Success',
+        code: 200,
+    });
+}));
+userRouter.get('/getAttendanceStatus', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let decoded;
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+        const authorization = req.headers.authorization.split(' ')[1];
+        const secret = 'EternalPlus@100';
+        decoded = jsonwebtoken_1.default.verify(authorization, secret);
+        console.log(decoded);
+    }
+    else {
+        res.send({
+            success: true,
+            data: {},
+            message: "Authorization header is not present",
+            code: 403,
+        });
+        return;
+    }
+    let historyUser;
+    let companyDetail;
+    let companyId;
+    if (typeof decoded !== 'string' && 'userId' in decoded) {
+        historyUser = yield attendanceTimeEntity_1.attendanceTimeEntity.findAll({
+            attributes: ['action', 'timestamp'],
+            where: {
+                employee_id: decoded.userId,
+            },
+            order: [['timestamp', 'DESC']],
+            limit: 1,
+        });
+        companyId = yield employeeEntity_1.employeeEntity.findOne({
+            attributes: ['company_id'],
+            where: {
+                id: decoded.userId,
+            },
+        });
+        companyDetail = yield companyEntity_1.companyEntity.findOne({
+            attributes: ['latitude', 'longitude'],
+            where: {
+                id: companyId === null || companyId === void 0 ? void 0 : companyId.get('company_id'),
+            },
+        });
+    }
+    if (historyUser && historyUser[0]) {
+        const lastAction = historyUser[0].get('action');
+        if (lastAction === 'CHECK_IN') {
+            res.send({
+                success: true,
+                data: {
+                    action: 'clock-out',
+                    clockIn: historyUser[0].get('timestamp'),
+                    clockOut: null,
+                    companyLatitude: companyDetail === null || companyDetail === void 0 ? void 0 : companyDetail.get('latitude'),
+                    companyLongitude: companyDetail === null || companyDetail === void 0 ? void 0 : companyDetail.get('longitude'),
+                },
+                message: 'Get Attendance Status Success',
+                code: 200,
+            });
+        }
+    }
+    else {
+        res.send({
+            success: true,
+            data: {
+                action: 'clock-in',
+                clockIn: null,
+                clockOut: null,
+                companyLatitude: companyDetail === null || companyDetail === void 0 ? void 0 : companyDetail.get('latitude'),
+                companyLongitude: companyDetail === null || companyDetail === void 0 ? void 0 : companyDetail.get('longitude'),
+            },
+            message: 'Get Attendance Status Success',
+            code: 200,
+        });
+    }
 }));
 exports.default = userRouter;

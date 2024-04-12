@@ -27,7 +27,7 @@ exports.employeeEntity = sequelize_2.sequelize.define('Employee', {
     },
     role: {
         type: sequelize_1.DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
 }, {
     freezeTableName: true,

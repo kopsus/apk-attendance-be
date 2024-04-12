@@ -13,7 +13,7 @@ const insertEmployee = async ({
 }: {
     companyId: number
     email: string
-    hashedPassword: string,
+    hashedPassword: string
     role: string
 }): Promise<IStandardResponse> => {
     try {

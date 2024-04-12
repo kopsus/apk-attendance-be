@@ -1,5 +1,7 @@
 import { Request, Response, Router } from 'express'
 import { employeeEntity } from '../model/employeeEntity'
+import { companyEntity } from '../model/companyEntity'
+import { attendanceTimeEntity } from '../model/attendanceTimeEntity'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import multer from 'multer'
@@ -13,9 +15,16 @@ userRouter.post('/login', async function (req: Request, res: Response) {
     try {
         // Checking if the user exists in the database
         const user = await employeeEntity.findOne({
-            attributes: ['id', 'password'],
+            attributes: ['id', 'password', 'company_id', 'role', 'name'],
             where: {
                 email: req.body.email,
+            },
+        })
+
+        const company = await companyEntity.findOne({
+            attributes: ['name', 'longitude', 'latitude'],
+            where: {
+                id: user?.get('company_id'),
             },
         })
 
@@ -41,9 +50,15 @@ userRouter.post('/login', async function (req: Request, res: Response) {
 
             res.send({
                 success: true,
-                data: { accessToken,
+                data: {
+                    accessToken,
                     expiredAt: expiredAt,
-                 },
+                    companyName: company?.get('name'),
+                    latitude: company?.get('latitude'),
+                    longitude: company?.get('longitude'),
+                    role: user?.get('role'),
+                    name: user?.get('name'),
+                },
                 message: 'Login Successfully',
                 code: 200,
             })
@@ -57,41 +72,199 @@ userRouter.post('/login', async function (req: Request, res: Response) {
 })
 
 // Set up Multer for handling multipart/form-data (file uploads)
-const upload = multer({ dest: 'uploads/' }); // Destination folder for uploaded files
+const upload = multer({ dest: 'uploads/' }) // Destination folder for uploaded files
 
 // Endpoint for uploading photos
-userRouter.post('/attendance', upload.single('photo'), async (req: Request, res: Response) => {
-    const { employeeId, action } = req.body
-    const imageId = req.file?.filename || ''
+userRouter.post(
+    '/attendance',
+    upload.single('photo'),
+    async (req: Request, res: Response) => {
+        let decoded
+        if (
+            req.headers.authorization &&
+            req.headers.authorization.split(' ')[0] === 'Bearer'
+        ) {
+            const authorization = req.headers.authorization.split(' ')[1]
+            const secret = 'EternalPlus@100'
+            decoded = jwt.verify(authorization, secret)
+            console.log(decoded)
+        } else {
+            res.send({
+                success: true,
+                data: {},
+                message: 'Authorization header is not present',
+                code: 403,
+            })
+            return
+        }
 
-    const newAttendance = await AttendanceTimeService.insertAttendace({
-        employeeId: employeeId,
-        action: action,
-        imageId: imageId,
-    })
+        if (typeof decoded === 'string' || !decoded.userId) {
+            res.send({
+                success: false,
+                data: {},
+                message: 'Authorization failed',
+                code: 403,
+            })
+            return
+        }
 
-    if (newAttendance.errorMessage != null) {
-        res.status(500).json({ error: newAttendance.errorMessage })
+        const lastHistory = await attendanceTimeEntity.findAll({
+            attributes: ['action', 'timestamp'],
+            where: {
+                employee_id: decoded.userId,
+            },
+            order: [['timestamp', 'DESC']],
+            limit: 1,
+        })
+
+        let action
+        if (!lastHistory || lastHistory.length === 0) {
+            action = 'CHECK_IN'
+        } else {
+            action =
+                lastHistory[0].get('action') === 'CHECK_IN'
+                    ? 'CHECK_OUT'
+                    : 'CHECK_IN'
+        }
+
+        const imageId = req.file?.filename || ''
+
+        const newAttendance = await AttendanceTimeService.insertAttendace({
+            employeeId: decoded.userId,
+            action: action,
+            imageId: imageId,
+        })
+
+        if (newAttendance.errorMessage != null) {
+            res.status(500).json({ error: newAttendance.errorMessage })
+            return
+        }
+
+        res.send({
+            success: true,
+            data: {},
+            message: `${action} Successfully`,
+            code: 200,
+        })
+    },
+)
+
+userRouter.get('/getHistoryByUserId', async (req: Request, res: Response) => {
+    let decoded
+    if (
+        req.headers.authorization &&
+        req.headers.authorization.split(' ')[0] === 'Bearer'
+    ) {
+        const authorization = req.headers.authorization.split(' ')[1]
+        const secret = 'EternalPlus@100'
+        decoded = jwt.verify(authorization, secret)
+        console.log(decoded)
+    } else {
+        res.send({
+            success: true,
+            data: {},
+            message: 'Authorization header is not present',
+            code: 403,
+        })
         return
+    }
+
+    let historyUser
+    if (typeof decoded !== 'string' && 'userId' in decoded) {
+        historyUser = await attendanceTimeEntity.findAll({
+            attributes: ['action', 'timestamp'],
+            where: {
+                id: decoded.userId,
+            },
+        })
     }
 
     res.send({
         success: true,
-        data: {},
-        message:`${action} Successfully`,
+        data: historyUser,
+        message: 'Get History Success',
         code: 200,
     })
-});
+})
 
-userRouter.get(
-    '/getHistoryByUserId',
-   async (req: Request, res: Response) => {
-        const response = await companyService.getCompanyList()
-        const curatedResponse = response.map((company) => ({
-            id: company.id,
-            name: company.name,
-        }))
-        res.send(curatedResponse)
-    })
+userRouter.get('/getAttendanceStatus', async (req: Request, res: Response) => {
+    let decoded
+    if (
+        req.headers.authorization &&
+        req.headers.authorization.split(' ')[0] === 'Bearer'
+    ) {
+        const authorization = req.headers.authorization.split(' ')[1]
+        const secret = 'EternalPlus@100'
+        decoded = jwt.verify(authorization, secret)
+        console.log(decoded)
+    } else {
+        res.send({
+            success: true,
+            data: {},
+            message: 'Authorization header is not present',
+            code: 403,
+        })
+        return
+    }
+
+    let historyUser
+    let companyDetail
+    let companyId
+    if (typeof decoded !== 'string' && 'userId' in decoded) {
+        historyUser = await attendanceTimeEntity.findAll({
+            attributes: ['action', 'timestamp'],
+            where: {
+                employee_id: decoded.userId,
+            },
+            order: [['timestamp', 'DESC']],
+            limit: 1,
+        })
+
+        companyId = await employeeEntity.findOne({
+            attributes: ['company_id'],
+            where: {
+                id: decoded.userId,
+            },
+        })
+
+        companyDetail = await companyEntity.findOne({
+            attributes: ['latitude', 'longitude'],
+            where: {
+                id: companyId?.get('company_id'),
+            },
+        })
+    }
+
+    if (historyUser && historyUser[0]) {
+        const lastAction = historyUser[0].get('action')
+        if (lastAction === 'CHECK_IN') {
+            res.send({
+                success: true,
+                data: {
+                    action: 'clock-out',
+                    clockIn: historyUser[0].get('timestamp'),
+                    clockOut: null,
+                    companyLatitude: companyDetail?.get('latitude'),
+                    companyLongitude: companyDetail?.get('longitude'),
+                },
+                message: 'Get Attendance Status Success',
+                code: 200,
+            })
+        }
+    } else {
+        res.send({
+            success: true,
+            data: {
+                action: 'clock-in',
+                clockIn: null,
+                clockOut: null,
+                companyLatitude: companyDetail?.get('latitude'),
+                companyLongitude: companyDetail?.get('longitude'),
+            },
+            message: 'Get Attendance Status Success',
+            code: 200,
+        })
+    }
+})
 
 export default userRouter

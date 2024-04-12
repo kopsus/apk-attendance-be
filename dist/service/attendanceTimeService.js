@@ -20,7 +20,7 @@ const getAllAttendanceTimes = (limit, offset, sortBy, sortOrder) => __awaiter(vo
     const attendanceTimesCountRows = yield attendanceTimeAccessor_1.default.getAllAttendanceTimesCount();
     return {
         data: attendanceTimesData,
-        count: attendanceTimesCountRows[0].total
+        count: attendanceTimesCountRows[0].total,
     };
 });
 const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ employeeId, action, imageId, }) {
@@ -29,7 +29,7 @@ const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ emp
         employeeId,
         action,
         imageId,
-        timestamp
+        timestamp,
     });
 });
 exports.default = {
