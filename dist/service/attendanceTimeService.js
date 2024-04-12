@@ -23,13 +23,13 @@ const getAllAttendanceTimes = (limit, offset, sortBy, sortOrder) => __awaiter(vo
         count: attendanceTimesCountRows[0].total,
     };
 });
-const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ employeeId, action, imageId, }) {
-    const timestamp = Date.now();
+const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ employeeId, action, imageId, timestamp, status, }) {
     return yield attendanceTimeAccessor_1.default.insertAttendace({
         employeeId,
         action,
         imageId,
         timestamp,
+        status,
     });
 });
 exports.default = {

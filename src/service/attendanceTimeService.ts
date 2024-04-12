@@ -28,17 +28,21 @@ const insertAttendace = async ({
     employeeId,
     action,
     imageId,
+    timestamp,
+    status,
 }: {
     employeeId: number
     action: string
     imageId: string
+    timestamp: number
+    status: string
 }): Promise<IStandardResponse> => {
-    const timestamp = Date.now()
     return await attendanceTimeAccessor.insertAttendace({
         employeeId,
         action,
         imageId,
         timestamp,
+        status,
     })
 }
 

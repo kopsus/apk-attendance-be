@@ -14,6 +14,18 @@ exports.companyEntity = sequelize_2.sequelize.define('Company', {
         allowNull: false,
         unique: 'name',
     },
+    address: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false,
+    },
+    clock_in: {
+        type: sequelize_1.DataTypes.TIME,
+        allowNull: false,
+    },
+    clock_out: {
+        type: sequelize_1.DataTypes.TIME,
+        allowNull: false,
+    },
     latitude: {
         type: sequelize_1.DataTypes.FLOAT,
         allowNull: false,

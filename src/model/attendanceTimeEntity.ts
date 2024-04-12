@@ -26,6 +26,10 @@ export const attendanceTimeEntity = sequelize.define(
             allowNull: false,
             unique: 'imageId',
         },
+        status: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
     },
     {
         freezeTableName: true,

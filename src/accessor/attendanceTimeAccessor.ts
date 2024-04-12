@@ -4,6 +4,7 @@ import { sequelize } from './sequelize'
 import { IStandardResponse } from '../model/dto/standardResponse'
 import { attendanceTimeEntity } from '../model/attendanceTimeEntity'
 import LoggerUtil from '../util/loggerUtil'
+import { stat } from 'fs'
 
 interface ITotalRows {
     total: number
@@ -43,11 +44,13 @@ const insertAttendace = async ({
     action,
     imageId,
     timestamp,
+    status,
 }: {
     employeeId: number
     action: string
     imageId: string
     timestamp: number
+    status: string
 }): Promise<IStandardResponse> => {
     try {
         const newEmployee = await attendanceTimeEntity.create({
@@ -55,6 +58,7 @@ const insertAttendace = async ({
             action: action,
             image_id: imageId,
             timestamp: timestamp,
+            status: status,
         })
 
         return { data: newEmployee }

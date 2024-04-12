@@ -34,13 +34,14 @@ const getAllAttendanceTimesCount = () => __awaiter(void 0, void 0, void 0, funct
     const data = yield sequelize_2.sequelize.query(query, { type: sequelize_1.QueryTypes.SELECT });
     return data.map((each) => each);
 });
-const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ employeeId, action, imageId, timestamp, }) {
+const insertAttendace = (_a) => __awaiter(void 0, [_a], void 0, function* ({ employeeId, action, imageId, timestamp, status, }) {
     try {
         const newEmployee = yield attendanceTimeEntity_1.attendanceTimeEntity.create({
             employee_id: employeeId,
             action: action,
             image_id: imageId,
             timestamp: timestamp,
+            status: status,
         });
         return { data: newEmployee };
     }

@@ -26,6 +26,10 @@ exports.attendanceTimeEntity = sequelize_2.sequelize.define('AttendanceTime', {
         allowNull: false,
         unique: 'imageId',
     },
+    status: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false,
+    },
 }, {
     freezeTableName: true,
 });

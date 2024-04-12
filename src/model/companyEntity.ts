@@ -21,6 +21,18 @@ export const companyEntity = sequelize.define(
             allowNull: false,
             unique: 'name',
         },
+        address: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        clock_in: {
+            type: DataTypes.TIME,
+            allowNull: false,
+        },
+        clock_out: {
+            type: DataTypes.TIME,
+            allowNull: false,
+        },
         latitude: {
             type: DataTypes.FLOAT,
             allowNull: false,

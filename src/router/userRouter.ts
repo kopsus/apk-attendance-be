@@ -117,14 +117,56 @@ userRouter.post(
             limit: 1,
         })
 
+        const companyId = await employeeEntity.findOne({
+            attributes: ['company_id'],
+            where: {
+                id: decoded.userId,
+            },
+        })
+
+        const companyTimeline = await companyEntity.findOne({
+            attributes: ['clock_in', 'clock_out'],
+            where: {
+                id: companyId?.get('company_id'),
+            },
+        })
+
         let action
+        let timestamp = Date.now()
+        let clock = new Date(timestamp).toTimeString().slice(3, 9)
+        let clockIn =
+            companyTimeline && companyTimeline.get('clock_in')
+                ? new Date(
+                      companyTimeline.get('clock_in') as string | number | Date,
+                  )
+                      .toTimeString()
+                      .slice(3, 9)
+                : new Date(Date.now()).toTimeString().slice(3, 9)
+        let clockOut =
+            companyTimeline && companyTimeline.get('clock_out')
+                ? new Date(
+                      companyTimeline.get('clock_out') as
+                          | string
+                          | number
+                          | Date,
+                  )
+                      .toTimeString()
+                      .slice(3, 9)
+                : new Date(Date.now()).toTimeString().slice(3, 9)
+        let status
         if (!lastHistory || lastHistory.length === 0) {
             action = 'CHECK_IN'
+            status = clock < clockIn ? 'LATE' : 'ON TIME'
         } else {
             action =
                 lastHistory[0].get('action') === 'CHECK_IN'
                     ? 'CHECK_OUT'
                     : 'CHECK_IN'
+            if (action === 'CHECK_OUT') {
+                status = clock > clockOut ? 'EARLY' : 'ON TIME'
+            } else {
+                status = clock < clockIn ? 'LATE' : 'ON TIME'
+            }
         }
 
         const imageId = req.file?.filename || ''
@@ -133,6 +175,8 @@ userRouter.post(
             employeeId: decoded.userId,
             action: action,
             imageId: imageId,
+            timestamp: timestamp,
+            status: status,
         })
 
         if (newAttendance.errorMessage != null) {
@@ -172,9 +216,9 @@ userRouter.get('/getHistoryByUserId', async (req: Request, res: Response) => {
     let historyUser
     if (typeof decoded !== 'string' && 'userId' in decoded) {
         historyUser = await attendanceTimeEntity.findAll({
-            attributes: ['action', 'timestamp'],
+            attributes: ['action', 'timestamp', 'status'],
             where: {
-                id: decoded.userId,
+                employee_id: decoded.userId,
             },
         })
     }
@@ -228,7 +272,7 @@ userRouter.get('/getAttendanceStatus', async (req: Request, res: Response) => {
         })
 
         companyDetail = await companyEntity.findOne({
-            attributes: ['latitude', 'longitude'],
+            attributes: ['latitude', 'longitude', 'address'],
             where: {
                 id: companyId?.get('company_id'),
             },
@@ -236,6 +280,7 @@ userRouter.get('/getAttendanceStatus', async (req: Request, res: Response) => {
     }
 
     if (historyUser && historyUser[0]) {
+        console.log(historyUser[0].get('action'))
         const lastAction = historyUser[0].get('action')
         if (lastAction === 'CHECK_IN') {
             res.send({
@@ -244,6 +289,21 @@ userRouter.get('/getAttendanceStatus', async (req: Request, res: Response) => {
                     action: 'clock-out',
                     clockIn: historyUser[0].get('timestamp'),
                     clockOut: null,
+                    companyAddress: companyDetail?.get('address'),
+                    companyLatitude: companyDetail?.get('latitude'),
+                    companyLongitude: companyDetail?.get('longitude'),
+                },
+                message: 'Get Attendance Status Success',
+                code: 200,
+            })
+        } else {
+            res.send({
+                success: true,
+                data: {
+                    action: 'clock-in',
+                    clockIn: null,
+                    clockOut: null,
+                    companyAddress: companyDetail?.get('address'),
                     companyLatitude: companyDetail?.get('latitude'),
                     companyLongitude: companyDetail?.get('longitude'),
                 },
@@ -258,6 +318,7 @@ userRouter.get('/getAttendanceStatus', async (req: Request, res: Response) => {
                 action: 'clock-in',
                 clockIn: null,
                 clockOut: null,
+                companyAddress: companyDetail?.get('address'),
                 companyLatitude: companyDetail?.get('latitude'),
                 companyLongitude: companyDetail?.get('longitude'),
             },
