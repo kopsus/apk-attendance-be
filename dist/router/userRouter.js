@@ -130,8 +130,16 @@ userRouter.post('/attendance', upload.single('photo'), (req, res) => __awaiter(v
     let action;
     let timestamp = Date.now();
     let clock = new Date(timestamp).toTimeString().slice(3, 9);
-    let clockIn = companyTimeline && companyTimeline.get('clock_in') ? new Date(companyTimeline.get('clock_in')).toTimeString().slice(3, 9) : new Date(Date.now()).toTimeString().slice(3, 9);
-    let clockOut = companyTimeline && companyTimeline.get('clock_out') ? new Date(companyTimeline.get('clock_out')).toTimeString().slice(3, 9) : new Date(Date.now()).toTimeString().slice(3, 9);
+    let clockIn = companyTimeline && companyTimeline.get('clock_in')
+        ? new Date(companyTimeline.get('clock_in'))
+            .toTimeString()
+            .slice(3, 9)
+        : new Date(Date.now()).toTimeString().slice(3, 9);
+    let clockOut = companyTimeline && companyTimeline.get('clock_out')
+        ? new Date(companyTimeline.get('clock_out'))
+            .toTimeString()
+            .slice(3, 9)
+        : new Date(Date.now()).toTimeString().slice(3, 9);
     let status;
     if (!lastHistory || lastHistory.length === 0) {
         action = 'CHECK_IN';
@@ -193,6 +201,7 @@ userRouter.get('/getHistoryByUserId', (req, res) => __awaiter(void 0, void 0, vo
             where: {
                 employee_id: decoded.userId,
             },
+            order: [['timestamp', 'DESC']],
         });
     }
     res.send({

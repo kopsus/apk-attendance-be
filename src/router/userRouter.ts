@@ -220,6 +220,7 @@ userRouter.get('/getHistoryByUserId', async (req: Request, res: Response) => {
             where: {
                 employee_id: decoded.userId,
             },
+            order: [['timestamp', 'DESC']],
         })
     }
 
