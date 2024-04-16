@@ -87,7 +87,6 @@ userRouter.post('/attendance', upload.single('photo'), (req, res) => __awaiter(v
         const authorization = req.headers.authorization.split(' ')[1];
         const secret = 'EternalPlus@100';
         decoded = jsonwebtoken_1.default.verify(authorization, secret);
-        console.log(decoded);
     }
     else {
         res.send({
@@ -183,7 +182,6 @@ userRouter.get('/getHistoryByUserId', (req, res) => __awaiter(void 0, void 0, vo
         const authorization = req.headers.authorization.split(' ')[1];
         const secret = 'EternalPlus@100';
         decoded = jsonwebtoken_1.default.verify(authorization, secret);
-        console.log(decoded);
     }
     else {
         res.send({
@@ -218,7 +216,6 @@ userRouter.get('/getAttendanceStatus', (req, res) => __awaiter(void 0, void 0, v
         const authorization = req.headers.authorization.split(' ')[1];
         const secret = 'EternalPlus@100';
         decoded = jsonwebtoken_1.default.verify(authorization, secret);
-        console.log(decoded);
     }
     else {
         res.send({
@@ -239,7 +236,7 @@ userRouter.get('/getAttendanceStatus', (req, res) => __awaiter(void 0, void 0, v
                 employee_id: decoded.userId,
             },
             order: [['timestamp', 'DESC']],
-            limit: 1,
+            limit: 2,
         });
         companyId = yield employeeEntity_1.employeeEntity.findOne({
             attributes: ['company_id'],
@@ -255,7 +252,6 @@ userRouter.get('/getAttendanceStatus', (req, res) => __awaiter(void 0, void 0, v
         });
     }
     if (historyUser && historyUser[0]) {
-        console.log(historyUser[0].get('action'));
         const lastAction = historyUser[0].get('action');
         if (lastAction === 'CHECK_IN') {
             res.send({
@@ -277,8 +273,8 @@ userRouter.get('/getAttendanceStatus', (req, res) => __awaiter(void 0, void 0, v
                 success: true,
                 data: {
                     action: 'clock-in',
-                    clockIn: null,
-                    clockOut: null,
+                    clockIn: historyUser[1].get('timestamp'),
+                    clockOut: historyUser[0].get('timestamp'),
                     companyAddress: companyDetail === null || companyDetail === void 0 ? void 0 : companyDetail.get('address'),
                     companyLatitude: companyDetail === null || companyDetail === void 0 ? void 0 : companyDetail.get('latitude'),
                     companyLongitude: companyDetail === null || companyDetail === void 0 ? void 0 : companyDetail.get('longitude'),

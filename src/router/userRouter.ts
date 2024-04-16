@@ -87,7 +87,6 @@ userRouter.post(
             const authorization = req.headers.authorization.split(' ')[1]
             const secret = 'EternalPlus@100'
             decoded = jwt.verify(authorization, secret)
-            console.log(decoded)
         } else {
             res.send({
                 success: true,
@@ -202,7 +201,6 @@ userRouter.get('/getHistoryByUserId', async (req: Request, res: Response) => {
         const authorization = req.headers.authorization.split(' ')[1]
         const secret = 'EternalPlus@100'
         decoded = jwt.verify(authorization, secret)
-        console.log(decoded)
     } else {
         res.send({
             success: true,
@@ -241,7 +239,6 @@ userRouter.get('/getAttendanceStatus', async (req: Request, res: Response) => {
         const authorization = req.headers.authorization.split(' ')[1]
         const secret = 'EternalPlus@100'
         decoded = jwt.verify(authorization, secret)
-        console.log(decoded)
     } else {
         res.send({
             success: true,
@@ -262,7 +259,7 @@ userRouter.get('/getAttendanceStatus', async (req: Request, res: Response) => {
                 employee_id: decoded.userId,
             },
             order: [['timestamp', 'DESC']],
-            limit: 1,
+            limit: 2,
         })
 
         companyId = await employeeEntity.findOne({
@@ -281,7 +278,6 @@ userRouter.get('/getAttendanceStatus', async (req: Request, res: Response) => {
     }
 
     if (historyUser && historyUser[0]) {
-        console.log(historyUser[0].get('action'))
         const lastAction = historyUser[0].get('action')
         if (lastAction === 'CHECK_IN') {
             res.send({
@@ -302,8 +298,8 @@ userRouter.get('/getAttendanceStatus', async (req: Request, res: Response) => {
                 success: true,
                 data: {
                     action: 'clock-in',
-                    clockIn: null,
-                    clockOut: null,
+                    clockIn: historyUser[1].get('timestamp'),
+                    clockOut: historyUser[0].get('timestamp'),
                     companyAddress: companyDetail?.get('address'),
                     companyLatitude: companyDetail?.get('latitude'),
                     companyLongitude: companyDetail?.get('longitude'),
