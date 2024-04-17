@@ -24,12 +24,13 @@ adminRouter.get('/ping', (req, res) => {
     res.send('pong');
 });
 adminRouter.post('/signup', (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { companyId, email, password, role } = req.body;
+    const { companyId, email, password, role, name } = req.body;
     const newUser = yield employeeService_1.default.insertEmployee({
         companyId: companyId,
         email: email,
         plainPassword: password,
         role: role,
+        name: name
     });
     if (newUser.errorMessage != null) {
         res.status(500).json({ error: newUser.errorMessage });

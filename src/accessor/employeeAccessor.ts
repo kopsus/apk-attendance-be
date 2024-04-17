@@ -10,11 +10,13 @@ const insertEmployee = async ({
     email,
     hashedPassword,
     role,
+    name,
 }: {
     companyId: number
     email: string
     hashedPassword: string
-    role: string
+    role: string,
+    name: string
 }): Promise<IStandardResponse> => {
     try {
         const newEmployee = await employeeEntity.create({
@@ -22,6 +24,7 @@ const insertEmployee = async ({
             password: hashedPassword,
             company_id: companyId,
             role: role,
+            name: name
         })
 
         return { data: newEmployee }

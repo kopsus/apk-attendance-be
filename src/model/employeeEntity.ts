@@ -11,6 +11,7 @@ export const employeeEntity = sequelize.define(
         },
         name: {
             type: DataTypes.STRING,
+            allowNull: true,
         },
         email: {
             type: DataTypes.STRING,
